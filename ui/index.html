@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Excel Splitter - 高性能Excel拆分工具</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border: 1px solid #e9ecef;
+        }
+
+        .section-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .file-input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .file-input-group input {
+            flex: 1;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .sheet-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .sheet-item {
+            padding: 12px;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .sheet-item:hover {
+            border-color: #667eea;
+        }
+
+        .sheet-item.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .sheet-item input[type="checkbox"] {
+            margin: 0;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .preview-table th,
+        .preview-table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .preview-table th {
+            background: #667eea;
+            color: white;
+            font-weight: 500;
+        }
+
+        .preview-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        .progress-container {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #667eea;
+        }
+
+        .progress-container.active {
+            display: block;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .results-container {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .results-container.active {
+            display: block;
+        }
+
+        .result-item {
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 4px solid #28a745;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .result-item h4 {
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .result-item p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .alert {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+        }
+
+        .alert-info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .two-column {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .two-column {
+                grid-template-columns: 1fr;
+            }
+            
+            .sheet-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 Excel Splitter</h1>
+            <p>高性能 Excel 拆分工具 - Rust 驱动</p>
+        </div>
+
+        <div class="content">
+            <!-- 文件选择区域 -->
+            <div class="section">
+                <div class="section-title">
+                    📁 选择文件
+                </div>
+                <div class="form-group">
+                    <label>Excel 文件路径</label>
+                    <div class="file-input-group">
+                        <input type="text" id="filePath" placeholder="点击浏览选择 Excel 文件..." readonly>
+                        <button class="btn btn-secondary" onclick="selectFile()">浏览...</button>
+                    </div>
+                </div>
+                <div id="fileInfo" style="display: none;">
+                    <div class="alert alert-info">
+                        <strong>文件信息：</strong>
+                        <span id="fileName"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sheet 选择区域 -->
+            <div class="section" id="sheetSection" style="display: none;">
+                <div class="section-title">
+                    📋 选择工作表
+                </div>
+                
+                <div class="form-group">
+                    <label>要拆分的 Sheet（多选）</label>
+                    <div class="sheet-list" id="splitSheets"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>公共 Sheet（复制到所有输出文件）</label>
+                    <div class="sheet-list" id="publicSheets"></div>
+                </div>
+            </div>
+
+            <!-- 配置区域 -->
+            <div class="section" id="configSection" style="display: none;">
+                <div class="section-title">
+                    ⚙️ 拆分配置
+                </div>
+                
+                <div class="two-column">
+                    <div class="form-group">
+                        <label>表头行号（从1开始）</label>
+                        <input type="number" id="headerRow" value="1" min="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>拆分依据列</label>
+                        <select id="splitColumn">
+                            <option value="">请先选择 Sheet</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="two-column">
+                    <div class="form-group">
+                        <label>空值处理</label>
+                        <select id="emptyHandling">
+                            <option value="empty_group">归为"空值"组</option>
+                            <option value="skip">跳过空值行</option>
+                            <option value="stop">遇到空值停止</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>文件名模板</label>
+                        <input type="text" id="filenameTemplate" value="{base}_{group}.xlsx">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>输出目录</label>
+                    <div class="file-input-group">
+                        <input type="text" id="outputDir" placeholder="默认: split_output" readonly>
+                        <button class="btn btn-secondary" onclick="selectOutputDir()">选择目录...</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 数据预览区域 -->
+            <div class="section" id="previewSection" style="display: none;">
+                <div class="section-title">
+                    👁️ 数据预览
+                </div>
+                <div id="previewContent"></div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="section" id="actionSection" style="display: none;">
+                <button class="btn btn-primary" onclick="startSplit()" style="width: 100%; font-size: 16px;">
+                    🚀 开始拆分
+                </button>
+            </div>
+
+            <!-- 进度显示 -->
+            <div class="progress-container" id="progressContainer">
+                <h3>⏳ 正在处理...</h3>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%">0%</div>
+                </div>
+                <p id="progressMessage">准备开始...</p>
+            </div>
+
+            <!-- 结果展示 -->
+            <div class="results-container" id="resultsContainer">
+                <div class="section-title">
+                    ✅ 拆分完成
+                </div>
+                <div id="resultsList"></div>
+                <div style="margin-top: 20px; text-align: center;">
+                    <button class="btn btn-success" onclick="openOutputDir()">
+                        📂 打开输出目录
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 全局状态
+        let currentFile = '';
+        let sheetNames = [];
+        let selectedSplitSheets = [];
+        let selectedPublicSheets = [];
+
+        // 选择文件
+        async function selectFile() {
+            try {
+                const result = await window.__TAURI__.dialog.open({
+                    filters: [{
+                        name: 'Excel Files',
+                        extensions: ['xlsx', 'xls']
+                    }],
+                    multiple: false
+                });
+                
+                if (result) {
+                    currentFile = result;
+                    document.getElementById('filePath').value = result;
+                    await loadFileInfo();
+                }
+            } catch (error) {
+                showAlert('选择文件失败: ' + error, 'error');
+            }
+        }
+
+        // 加载文件信息
+        async function loadFileInfo() {
+            try {
+                const info = await window.__TAURI__.invoke('load_excel_file', {
+                    filepath: currentFile
+                });
+                
+                sheetNames = info.sheet_names;
+                
+                document.getElementById('fileName').textContent = 
+                    `${currentFile.split('\\').pop()} (${sheetNames.length} 个 Sheet)`;
+                document.getElementById('fileInfo').style.display = 'block';
+                
+                // 显示 Sheet 选择
+                renderSheetLists();
+                document.getElementById('sheetSection').style.display = 'block';
+                document.getElementById('configSection').style.display = 'block';
+                document.getElementById('previewSection').style.display = 'block';
+                document.getElementById('actionSection').style.display = 'block';
+                
+                // 加载第一个 Sheet 的预览
+                if (sheetNames.length > 0) {
+                    await loadPreview(sheetNames[0]);
+                    await loadColumns(sheetNames[0]);
+                }
+                
+            } catch (error) {
+                showAlert('加载文件失败: ' + error, 'error');
+            }
+        }
+
+        // 渲染 Sheet 列表
+        function renderSheetLists() {
+            const splitContainer = document.getElementById('splitSheets');
+            const publicContainer = document.getElementById('publicSheets');
+            
+            splitContainer.innerHTML = '';
+            publicContainer.innerHTML = '';
+            
+            sheetNames.forEach(sheet => {
+                // 拆分 Sheet 列表
+                const splitItem = document.createElement('div');
+                splitItem.className = 'sheet-item';
+                splitItem.innerHTML = `
+                    <input type="checkbox" value="${sheet}" onchange="updateSplitSheets()">
+                    <span>${sheet}</span>
+                `;
+                splitItem.onclick = (e) => {
+                    if (e.target.tagName !== 'INPUT') {
+                        const checkbox = splitItem.querySelector('input');
+                        checkbox.checked = !checkbox.checked;
+                        updateSplitSheets();
+                    }
+                };
+                splitContainer.appendChild(splitItem);
+                
+                // 公共 Sheet 列表
+                const publicItem = document.createElement('div');
+                publicItem.className = 'sheet-item';
+                publicItem.innerHTML = `
+                    <input type="checkbox" value="${sheet}" onchange="updatePublicSheets()">
+                    <span>${sheet}</span>
+                `;
+                publicItem.onclick = (e) => {
+                    if (e.target.tagName !== 'INPUT') {
+                        const checkbox = publicItem.querySelector('input');
+                        checkbox.checked = !checkbox.checked;
+                        updatePublicSheets();
+                    }
+                };
+                publicContainer.appendChild(publicItem);
+            });
+        }
+
+        // 更新拆分的 Sheet
+        function updateSplitSheets() {
+            selectedSplitSheets = Array.from(
+                document.querySelectorAll('#splitSheets input:checked')
+            ).map(cb => cb.value);
+            
+            // 更新列选择
+            if (selectedSplitSheets.length > 0) {
+                loadColumns(selectedSplitSheets[0]);
+            }
+        }
+
+        // 更新公共 Sheet
+        function updatePublicSheets() {
+            selectedPublicSheets = Array.from(
+                document.querySelectorAll('#publicSheets input:checked')
+            ).map(cb => cb.value);
+        }
+
+        // 加载列名
+        async function loadColumns(sheetName) {
+            try {
+                const headerRow = parseInt(document.getElementById('headerRow').value) || 1;
+                const columns = await window.__TAURI__.invoke('get_sheet_columns', {
+                    filepath: currentFile,
+                    sheet_name: sheetName,
+                    header_row: headerRow
+                });
+                
+                const select = document.getElementById('splitColumn');
+                select.innerHTML = '<option value="">请选择拆分列</option>';
+                columns.forEach(col => {
+                    const option = document.createElement('option');
+                    option.value = col;
+                    option.textContent = col;
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('加载列失败:', error);
+            }
+        }
+
+        // 加载预览
+        async function loadPreview(sheetName) {
+            try {
+                const data = await window.__TAURI__.invoke('preview_sheet_data', {
+                    filepath: currentFile,
+                    sheet_name: sheetName,
+                    max_rows: 20
+                });
+                
+                renderPreviewTable(data);
+            } catch (error) {
+                console.error('加载预览失败:', error);
+            }
+        }
+
+        // 渲染预览表格
+        function renderPreviewTable(data) {
+            const container = document.getElementById('previewContent');
+            
+            if (data.length === 0) {
+                container.innerHTML = '<p>无数据</p>';
+                return;
+            }
+            
+            const table = document.createElement('table');
+            table.className = 'preview-table';
+            
+            // 表头
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            data[0].forEach((cell, idx) => {
+                const th = document.createElement('th');
+                th.textContent = cell || `列 ${idx + 1}`;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+            
+            // 数据行
+            const tbody = document.createElement('tbody');
+            data.slice(1).forEach(row => {
+                const tr = document.createElement('tr');
+                row.forEach(cell => {
+                    const td = document.createElement('td');
+                    td.textContent = cell;
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+            
+            container.innerHTML = '';
+            container.appendChild(table);
+        }
+
+        // 选择输出目录
+        async function selectOutputDir() {
+            try {
+                const result = await window.__TAURI__.dialog.open({
+                    directory: true,
+                    multiple: false
+                });
+                
+                if (result) {
+                    document.getElementById('outputDir').value = result;
+                }
+            } catch (error) {
+                showAlert('选择目录失败: ' + error, 'error');
+            }
+        }
+
+        // 开始拆分
+        async function startSplit() {
+            if (selectedSplitSheets.length === 0) {
+                showAlert('请至少选择一个要拆分的 Sheet', 'error');
+                return;
+            }
+            
+            const splitColumn = document.getElementById('splitColumn').value;
+            if (!splitColumn) {
+                showAlert('请选择拆分依据列', 'error');
+                return;
+            }
+            
+            const config = {
+                input_file: currentFile,
+                split_sheets: selectedSplitSheets,
+                header_row: parseInt(document.getElementById('headerRow').value) || 1,
+                split_column: splitColumn,
+                public_sheets: selectedPublicSheets,
+                output_dir: document.getElementById('outputDir').value || 'split_output',
+                filename_template: document.getElementById('filenameTemplate').value || '{base}_{group}.xlsx',
+                empty_handling: document.getElementById('emptyHandling').value
+            };
+            
+            // 显示进度
+            document.getElementById('progressContainer').classList.add('active');
+            document.getElementById('resultsContainer').classList.remove('active');
+            
+            try {
+                const results = await window.__TAURI__.invoke('split_excel', { config });
+                showResults(results);
+            } catch (error) {
+                showAlert('拆分失败: ' + error, 'error');
+                document.getElementById('progressContainer').classList.remove('active');
+            }
+        }
+
+        // 显示结果
+        function showResults(results) {
+            document.getElementById('progressContainer').classList.remove('active');
+            document.getElementById('resultsContainer').classList.add('active');
+            
+            const container = document.getElementById('resultsList');
+            container.innerHTML = '';
+            
+            results.forEach(result => {
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                item.innerHTML = `
+                    <h4>📄 ${result.group}</h4>
+                    <p>文件: ${result.filepath}</p>
+                    <p>数据行数: ${result.rows}</p>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // 打开输出目录
+        async function openOutputDir() {
+            const outputDir = document.getElementById('outputDir').value || 'split_output';
+            try {
+                await window.__TAURI__.shell.open(outputDir);
+            } catch (error) {
+                showAlert('打开目录失败: ' + error, 'error');
+            }
+        }
+
+        // 显示提示
+        function showAlert(message, type) {
+            const alert = document.createElement('div');
+            alert.className = `alert alert-${type}`;
+            alert.textContent = message;
+            
+            const content = document.querySelector('.content');
+            content.insertBefore(alert, content.firstChild);
+            
+            setTimeout(() => alert.remove(), 5000);
+        }
+
+        // 监听进度事件
+        window.__TAURI__.event.listen('split-progress', (event) => {
+            const { current, total, message } = event.payload;
+            const percentage = Math.round((current / total) * 100);
+            
+            document.getElementById('progressFill').style.width = percentage + '%';
+            document.getElementById('progressFill').textContent = percentage + '%';
+            document.getElementById('progressMessage').textContent = message;
+        });
+
+        // 监听完成事件
+        window.__TAURI__.event.listen('split-complete', (event) => {
+            document.getElementById('progressFill').style.width = '100%';
+            document.getElementById('progressFill').textContent = '100%';
+            document.getElementById('progressMessage').textContent = '处理完成！';
+        });
+
+        // 表头行号变化时重新加载列
+        document.getElementById('headerRow').addEventListener('change', () => {
+            if (selectedSplitSheets.length > 0) {
+                loadColumns(selectedSplitSheets[0]);
+                loadPreview(selectedSplitSheets[0]);
+            }
+        });
+    </script>
+</body>
+</html>

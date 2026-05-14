@@ -1,0 +1,154 @@
+name: Build Excel Splitter
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Rust
+      uses: dtolnay/rust-action@stable
+      with:
+        toolchain: stable
+    
+    - name: Install Tauri CLI
+      run: cargo install tauri-cli
+    
+    - name: Cache cargo dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    
+    - name: Build Tauri App
+      run: cargo tauri build
+      working-directory: ./src-tauri
+    
+    - name: Upload EXE
+      uses: actions/upload-artifact@v4
+      with:
+        name: excel-splitter-windows-exe
+        path: src-tauri/target/release/excel-splitter.exe
+    
+    - name: Upload MSI Installer
+      uses: actions/upload-artifact@v4
+      with:
+        name: excel-splitter-windows-msi
+        path: src-tauri/target/release/bundle/msi/*.msi
+    
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          src-tauri/target/release/excel-splitter.exe
+          src-tauri/target/release/bundle/msi/*.msi
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build-linux:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          libwebkit2gtk-4.0-dev \
+          build-essential \
+          curl \
+          wget \
+          libssl-dev \
+          libgtk-3-dev \
+          libayatana-appindicator3-dev \
+          librsvg2-dev
+    
+    - name: Setup Rust
+      uses: dtolnay/rust-action@stable
+      with:
+        toolchain: stable
+    
+    - name: Install Tauri CLI
+      run: cargo install tauri-cli
+    
+    - name: Cache cargo dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    
+    - name: Build Tauri App
+      run: cargo tauri build
+      working-directory: ./src-tauri
+    
+    - name: Upload DEB
+      uses: actions/upload-artifact@v4
+      with:
+        name: excel-splitter-linux-deb
+        path: src-tauri/target/release/bundle/deb/*.deb
+    
+    - name: Upload AppImage
+      uses: actions/upload-artifact@v4
+      with:
+        name: excel-splitter-linux-appimage
+        path: src-tauri/target/release/bundle/appimage/*.AppImage
+
+  build-macos:
+    runs-on: macos-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Rust
+      uses: dtolnay/rust-action@stable
+      with:
+        toolchain: stable
+    
+    - name: Install Tauri CLI
+      run: cargo install tauri-cli
+    
+    - name: Cache cargo dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+    
+    - name: Build Tauri App
+      run: cargo tauri build
+      working-directory: ./src-tauri
+    
+    - name: Upload APP
+      uses: actions/upload-artifact@v4
+      with:
+        name: excel-splitter-macos-app
+        path: src-tauri/target/release/bundle/macos/*.app
+    
+    - name: Upload DMG
+      uses: actions/upload-artifact@v4
+      with:
+        name: excel-splitter-macos-dmg
+        path: src-tauri/target/release/bundle/dmg/*.dmg

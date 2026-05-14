@@ -1,0 +1,45 @@
+[package]
+name = "excel-splitter"
+version = "1.0.0"
+description = "High-performance Excel file splitter with Tauri GUI"
+authors = ["Excel Splitter Team"]
+edition = "2021"
+rust-version = "1.70"
+
+[build-dependencies]
+tauri-build = { version = "1.5", features = [] }
+
+[dependencies]
+# Tauri GUI framework
+tauri = { version = "1.6", features = ["shell-open", "dialog-open", "dialog-save"] }
+
+# Excel reading
+calamine = "0.24"
+
+# Excel writing with format support
+rust_xlsxwriter = "0.70"
+
+# Error handling
+anyhow = "1.0"
+
+# Logging
+log = "0.4"
+env_logger = "0.11"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# File system
+walkdir = "2.5"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
