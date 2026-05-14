@@ -3,8 +3,7 @@
     "beforeBuildCommand": "",
     "beforeDevCommand": "",
     "devPath": "../ui",
-    "distDir": "../ui",
-    "withGlobalTauri": true
+    "distDir": "../ui"
   },
   "tauri": {
     "allowlist": {
